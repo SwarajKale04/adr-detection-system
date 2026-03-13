@@ -9,17 +9,20 @@ from backend.modules.data_loader import load_webmd_reviews, load_indian_substitu
 from backend.modules.analytics import load_adr_results, generate_analytics, print_analytics
 
 
-def main(use_mlp_sentiment: bool = False):
+def main(use_mlp_sentiment: bool = False, use_biobert_sentiment: bool = False):
     """
-    Main ADR detection pipeline with optional MLP sentiment analysis.
+    Main ADR detection pipeline with optional ML sentiment analysis.
 
     Args:
         use_mlp_sentiment (bool): Whether to use MLP model for sentiment analysis
+        use_biobert_sentiment (bool): Whether to use BioBERT model for sentiment analysis
     """
     print("🔍 ADR Detection System")
     print("=" * 50)
 
-    if use_mlp_sentiment:
+    if use_biobert_sentiment:
+        print("🧠 Using BioBERT-based sentiment analysis")
+    elif use_mlp_sentiment:
         print("🤖 Using MLP-based sentiment analysis")
     else:
         print("📋 Using rule-based sentiment analysis")
@@ -42,7 +45,8 @@ def main(use_mlp_sentiment: bool = False):
         substitutes_dict,
         medicine_reference,
         limit=999999,
-        use_mlp_sentiment=use_mlp_sentiment
+        use_mlp_sentiment=use_mlp_sentiment,
+        use_biobert_sentiment=use_biobert_sentiment
     )
 
     print(f"\n📊 Results Summary:")
@@ -80,6 +84,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='ADR Detection System')
     parser.add_argument('--mlp', action='store_true',
                        help='Use MLP model for sentiment analysis instead of rule-based')
+    parser.add_argument('--biobert', action='store_true',
+                       help='Use BioBERT model for sentiment analysis instead of rule-based')
     parser.add_argument('--train-mlp', action='store_true',
                        help='Train the MLP model first, then run pipeline')
 
@@ -91,4 +97,4 @@ if __name__ == "__main__":
         train_results = train_mlp_model()
         print(f"✅ MLP training completed with accuracy: {train_results['accuracy']:.3f}")
 
-    main(use_mlp_sentiment=args.mlp)
+    main(use_mlp_sentiment=args.mlp, use_biobert_sentiment=args.biobert)

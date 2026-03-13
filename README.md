@@ -1,10 +1,30 @@
 # ADR Detection System
 
-A comprehensive, rule-based system for detecting Adverse Drug Reactions (ADRs) from patient review datasets. This academic project processes 43,762 WebMD reviews to identify medication side effects and safety signals.
+A comprehensive system for detecting Adverse Drug Reactions (ADRs) from patient review datasets using **multiple NLP approaches**. This academic project processes 43,762 WebMD reviews to identify medication side effects and safety signals using rule-based, traditional ML, and modern transformer-based techniques.
+
+## 🤖 **NLP Capabilities Demonstrated**
+
+### **Rule-Based NLP** (Primary)
+- Keyword matching for sentiment analysis
+- String matching for symptom detection
+- Negation handling and validation
+- **4,024 ADRs detected** across 33 drugs
+
+### **Traditional ML NLP** (MLP)
+- **Multi-Layer Perceptron** classifier with TF-IDF features
+- **79.5% accuracy** on sentiment classification
+- Scikit-learn implementation
+
+### **Modern NLP** (BioBERT) ⭐
+- **BioBERT transformer** for medical text understanding
+- Domain-specific sentiment analysis
+- State-of-the-art contextual understanding
+- Advanced NLP techniques demonstration
 
 ## 📊 **Key Results**
-- **4,024 ADRs detected** across 33 unique drugs
-- **44 different symptoms** identified (nausea, anxiety, headache, etc.)
+- **4,024 ADRs detected** from 43,762 patient reviews
+- **33 unique drugs** with adverse reactions identified
+- **44 different symptoms** detected (nausea, anxiety, headache, etc.)
 - **Average confidence**: 0.82 for ADR detections
 - **Sentiment tracking** for all 142 processed drugs
 
@@ -14,13 +34,35 @@ A comprehensive, rule-based system for detecting Adverse Drug Reactions (ADRs) f
 - Python 3.8+
 - Required packages: `pip install -r backend/requirements.txt`
 
-### Usage
-```bash
-# Run the complete ADR detection pipeline
-python backend/main.py
+### Usage Options
 
-# Generate analytics and statistics
-python -c "from backend.modules.analytics import main; main()"
+#### Rule-Based Pipeline (Default)
+```bash
+python main.py
+```
+
+#### Traditional ML Pipeline (MLP)
+```bash
+# Train MLP model first
+python main.py --train-mlp
+
+# Run with MLP sentiment analysis
+python main.py --mlp
+```
+
+#### Modern NLP Pipeline (BioBERT) ⭐
+```bash
+# Run with BioBERT sentiment analysis
+python main.py --biobert
+```
+
+#### Comprehensive NLP Demonstration
+```bash
+# Compare all three approaches
+python nlp_demonstration.py
+
+# Test BioBERT specifically
+python test_biobert.py
 ```
 
 ## 📁 **Project Structure**
@@ -36,7 +78,9 @@ adr-detection-system/
 │   ├── modules/                       # Core processing modules
 │   │   ├── data_loader.py             # Dataset loading utilities
 │   │   ├── drug_mapper.py             # Drug name normalization
-│   │   ├── sentiment_analyzer.py      # Sentiment classification
+│   │   ├── sentiment_analyzer.py      # Rule-based sentiment analysis
+│   │   ├── mlp_sentiment_analyzer.py  # 🤖 Traditional ML sentiment analysis
+│   │   ├── biobert_sentiment_analyzer.py # 🧠 Modern NLP sentiment analysis
 │   │   ├── symptom_detector.py        # Symptom extraction
 │   │   ├── negation_handler.py        # Negation handling
 │   │   ├── pipeline.py                # Main processing pipeline
@@ -50,7 +94,10 @@ adr-detection-system/
 │   ├── main.py                        # Entry point
 │   └── requirements.txt               # Dependencies
 │
-├── test_*.py                          # Test scripts
+├── train_mlp_model.py                 # 🤖 MLP training script
+├── nlp_demonstration.py               # 🎭 NLP comparison demo
+├── test_biobert.py                    # 🧠 BioBERT test script
+├── test_*.py                          # Additional test scripts
 └── README.md
 ```
 

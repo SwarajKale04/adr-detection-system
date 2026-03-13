@@ -12,6 +12,7 @@ from .symptom_detector import detect_known_side_effects
 from .negation_handler import filter_negated_effects
 from .sentiment_analyzer import analyze_sentiment
 from .mlp_sentiment_analyzer import MLPSentimentAnalyzer
+from .biobert_sentiment_analyzer import BioBERTSentimentAnalyzer
 
 
 def run_pipeline(
@@ -19,7 +20,8 @@ def run_pipeline(
     substitutes_dict,
     medicine_reference,
     limit: int = 5000,
-    use_mlp_sentiment: bool = False
+    use_mlp_sentiment: bool = False,
+    use_biobert_sentiment: bool = False
 ) -> tuple[list, dict]:
     """
     Run the full ADR detection pipeline on drug reviews.
@@ -28,7 +30,7 @@ def run_pipeline(
     1. Normalize and map the drug name
     2. Detect side effects mentioned in the review
     3. Filter out negated effects
-    4. Analyze sentiment (rule-based or MLP)
+    4. Analyze sentiment (rule-based, MLP, or BioBERT)
     5. Create ADR entries for negative reviews with detected effects
 
     Args:
@@ -37,6 +39,7 @@ def run_pipeline(
         medicine_reference: Dictionary mapping normalized drugs to side effects
         limit (int): Maximum number of reviews to process (default 5000)
         use_mlp_sentiment (bool): Whether to use MLP model for sentiment analysis
+        use_biobert_sentiment (bool): Whether to use BioBERT model for sentiment analysis
 
     Returns:
         tuple: (adr_results, drug_sentiment_summary)
@@ -46,13 +49,21 @@ def run_pipeline(
     adr_results = []
     drug_sentiment = {}
 
-    # Initialize MLP analyzer if needed
+    # Initialize analyzers if needed
     mlp_analyzer = None
+    biobert_analyzer = None
+
     if use_mlp_sentiment:
         mlp_analyzer = MLPSentimentAnalyzer()
         if not mlp_analyzer.load_model():
             print("⚠️  MLP model not found, falling back to rule-based sentiment analysis")
             use_mlp_sentiment = False
+
+    if use_biobert_sentiment:
+        biobert_analyzer = BioBERTSentimentAnalyzer()
+        if not biobert_analyzer.load_model():
+            print("⚠️  BioBERT model not loaded, falling back to rule-based sentiment analysis")
+            use_biobert_sentiment = False
 
     # Process only first `limit` rows
     for idx, row in reviews_df.head(limit).iterrows():
@@ -66,7 +77,10 @@ def run_pipeline(
         indian_drug = map_to_indian_generic(original_drug, substitutes_dict)
 
         # Analyze sentiment for all reviews (for sentiment tracking)
-        if use_mlp_sentiment and mlp_analyzer:
+        if use_biobert_sentiment and biobert_analyzer:
+            sentiment_result = biobert_analyzer.analyze_sentiment(review_text)
+            sentiment = sentiment_result['sentiment']
+        elif use_mlp_sentiment and mlp_analyzer:
             sentiment_result = mlp_analyzer.predict_sentiment(review_text)
             sentiment = sentiment_result['sentiment']
         else:
